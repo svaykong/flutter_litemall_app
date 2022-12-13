@@ -1,0 +1,11 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    constant_identifier_names: false # prefer using UpperCamelCase for constant names
+    require_trailing_commas: true # required trailing commas at the end
+    unnecessary_getters_setters: false # disable
+    prefer_contains: false
+    avoid_null_checks_in_equality_operators: true
