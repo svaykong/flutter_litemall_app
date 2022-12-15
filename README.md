@@ -16,13 +16,13 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 ### Provider
-Using with ViewModel could be change and rebuild UI
+##### Using with ViewModel could be change and rebuild UI
 1. context.watch<T>()
 
-The same context.watch<T>() but not rebuild the UI
+##### The same context.watch<T>() but not rebuild the UI
 2. context.read<T>()
 
-Only select some property 
+##### Only select some property 
 3. context.select<T>()
 
 
