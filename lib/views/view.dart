@@ -14,3 +14,5 @@ export 'home_view/product_view/product_view_detail.dart';
 export 'home_view/search_view.dart';
 export 'cart_view.dart';
 export 'notification_view.dart';
+export 'create_view/create_view.dart';
+export 'update_view/update_view.dart';

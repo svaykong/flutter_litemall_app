@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 
 import '../utils/util.dart';
@@ -38,12 +40,27 @@ class ProductSubData extends Equatable {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> subData = <String, dynamic>{};
+    subData['title'] = attributes.title;
+    subData['rating'] = attributes.rating.toString();
+    subData['description'] = attributes.description;
+    subData['quantity'] = attributes.quantity.toString();
+    subData['category'] = attributes.category.data!.id.toString();
+    subData['thumbnail'] = null; //attributes.thumbnail.id.toString();
+    subData['price'] = attributes.price.toString();
+
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['data'] = subData;
+    return data;
+  }
+
   @override
   List<Object?> get props => [id, attributes];
 }
 
 class ProductSubAttribute extends Equatable {
-  const ProductSubAttribute({
+  ProductSubAttribute({
     required this.title,
     required this.createdAt,
     required this.updatedAt,
@@ -61,21 +78,21 @@ class ProductSubAttribute extends Equatable {
     required this.thumbnail,
   });
 
-  final String title;
-  final String createdAt;
-  final String updatedAt;
-  final String publishedAt;
-  final double price;
-  final double rating;
-  final String description;
-  final int quantity;
-  final bool isFeaturedProduct;
-  final bool isBestSeller;
-  final bool isNewArrival;
-  final bool isTopRatedProduct;
-  final bool isSpecialOffer;
-  final ProductSubCategory category;
-  final Thumbnail thumbnail;
+  String title;
+  String createdAt;
+  String updatedAt;
+  String publishedAt;
+  double price;
+  double rating;
+  String description;
+  int quantity;
+  bool isFeaturedProduct;
+  bool isBestSeller;
+  bool isNewArrival;
+  bool isTopRatedProduct;
+  bool isSpecialOffer;
+  ProductSubCategory category;
+  Thumbnail thumbnail;
 
   factory ProductSubAttribute.fromJson(Map<String, dynamic> json) {
     double price = json['price'].toString().parseNum().toDouble();
@@ -132,13 +149,13 @@ class ProductSubCategory extends Equatable {
 }
 
 class ProductSubCategorySubData extends Equatable {
-  const ProductSubCategorySubData({
+  ProductSubCategorySubData({
     required this.id,
     // required this.attributes,
     this.jsonAttributes,
   });
 
-  final int id;
+  int id;
   final Map<String, dynamic>? jsonAttributes;
 
 //   final CategorySubAttribute attributes;

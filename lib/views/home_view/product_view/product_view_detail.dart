@@ -7,24 +7,24 @@ import 'package:toast/toast.dart';
 import '../../../viewmodels/viewmodel.dart';
 import '../../../models/product_model.dart';
 import '../../../utils/util.dart';
-import '../product_view/product_widgets/product_content.dart';
 
 class ProductViewDetail extends StatelessWidget {
   const ProductViewDetail({
     Key? key,
+    required this.productType,
     required this.product,
-    this.newHero = false,
   }) : super(key: key);
 
   static const routeName = '/product_view_detail';
+  final String productType;
   final ProductSubData product;
-  final bool newHero;
 
   @override
   Widget build(BuildContext context) {
     ToastContext().init(context);
     final height = MediaQuery.of(context).size.height;
     final productViewModel = context.watch<ProductViewModel>()..getProductContent(product);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -41,7 +41,7 @@ class ProductViewDetail extends StatelessWidget {
           StatefulBuilder(
             builder: (BuildContext context, void Function(void Function()) setState) {
               return CustomIconButton(
-                onPressed: () => Navigator.of(context).pushNamed(Global.CART).then((value) => setState(() => {})),
+                onPressed: () => Navigator.of(context).pushNamed(Global.CART).then((value) => setState(() {})),
                 icon: CustomIcon.cart,
                 showBadge: productViewModel.cartLists.isNotEmpty ? true : false,
               );
@@ -64,9 +64,7 @@ class ProductViewDetail extends StatelessWidget {
                   : Card(
                       margin: EdgeInsets.zero,
                       child: Hero(
-                        tag: newHero
-                            ? product.attributes.thumbnail.data!.attributes.name + product.attributes.thumbnail.data!.attributes.url
-                            : product.attributes.thumbnail.data!.attributes.name,
+                        tag: 'product-view-$productType-${product.attributes.thumbnail.data!.attributes.url}',
                         child: Image.network(
                           Global.host + product.attributes.thumbnail.data!.attributes.url,
                           fit: BoxFit.cover,
@@ -155,17 +153,6 @@ class ProductViewDetail extends StatelessWidget {
               const SizedBox(
                 height: 32.0,
               ),
-              /////////////////////////////////////////
-              // nested ProductContent is complex
-              ProductContent(
-                data: productViewModel.proLists,
-                newHero: true,
-              ),
-              /////////////////////////////////////////
-              const SizedBox(
-                height: 16.0,
-              ),
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(

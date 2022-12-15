@@ -1,32 +1,37 @@
 import 'package:flutter/material.dart';
 
-import '../../../../models/product_model.dart';
 import '../product_see_all_view.dart';
 import '../product_view.dart';
+import '../../../../models/product_model.dart';
 import '../../../../utils/util.dart';
 
-class ProductContent extends StatelessWidget {
+class ProductContent extends StatefulWidget {
   const ProductContent({
     Key? key,
     required this.data,
-    this.newHero = false,
+    required this.productType,
   }) : super(key: key);
 
   final List<ProductSubData> data;
-  final bool newHero;
+  final String productType;
 
   @override
-  Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
+  State<ProductContent> createState() => _ProductContentState();
+}
 
-    bool check1 = data.first.attributes.isFeaturedProduct;
-    bool check2 = data.first.attributes.isBestSeller;
-    bool check3 = data.first.attributes.isNewArrival;
-    bool check4 = data.first.attributes.isTopRatedProduct;
-    bool check5 = data.first.attributes.isSpecialOffer;
+class _ProductContentState extends State<ProductContent> {
+  List<ProductSubData> _listProducts = [];
+  String value = '';
 
-    String value = '';
+  void _init() {
+    _listProducts = widget.data;
+
+    bool check1 = _listProducts.first.attributes.isFeaturedProduct;
+    bool check2 = _listProducts.first.attributes.isBestSeller;
+    bool check3 = _listProducts.first.attributes.isNewArrival;
+    bool check4 = _listProducts.first.attributes.isTopRatedProduct;
+    bool check5 = _listProducts.first.attributes.isSpecialOffer;
+
     if (check1) {
       value = 'Featured Product';
     } else if (check2) {
@@ -38,81 +43,104 @@ class ProductContent extends StatelessWidget {
     } else if (check5) {
       value = 'Special Offers';
     }
+  }
 
-    return newHero
-        ? Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  value,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
+  @override
+  void initState() {
+    super.initState();
+
+    _init();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TitleShowCase(
+          text1: value,
+          onPressed: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ProductSeeAllView(
+                  seeAll: value,
+                  data: _listProducts,
+                ),
+              ),
+            );
+          },
+        ),
+        SizedBox(
+          height: height * 0.25,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _listProducts.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: SizedBox(
+                  width: width * 0.4,
+                  child: ProductView(
+                    productType: widget.productType,
+                    data: _listProducts[index],
+                    onProductUpdate: () {
+                      'onProductUpdate...'.log();
+                      setState(() {
+                        _listProducts.remove(_listProducts[index]);
+                      });
+                    },
                   ),
                 ),
-              ),
-              SizedBox(
-                height: height * 0.25,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: SizedBox(
-                        width: width * 0.4,
-                        child: ProductView(
-                          data: data[index],
-                          newHero: newHero,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          )
-        : Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TitleShowCase(
-                text1: value,
-                onPressed: () async {
-                  '$value See All pressed -- newHero -- $newHero ...'.log();
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => ProductSeeAllView(
-                        seeAll: value,
-                        data: data,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              SizedBox(
-                height: height * 0.25,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: SizedBox(
-                        width: width * 0.4,
-                        child: ProductView(
-                          data: data[index],
-                          newHero: newHero,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
+
+// Column(
+//       mainAxisAlignment: MainAxisAlignment.center,
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Padding(
+//           padding: const EdgeInsets.symmetric(vertical: 16.0),
+//           child: Text(
+//             value,
+//             style: const TextStyle(
+//               fontWeight: FontWeight.w700,
+//               fontSize: 20,
+//             ),
+//           ),
+//         ),
+//         SizedBox(
+//           height: height * 0.25,
+//           child: ListView.builder(
+//             scrollDirection: Axis.horizontal,
+//             itemCount: _listProducts.length,
+//             itemBuilder: (context, index) {
+//               return Padding(
+//                 padding: const EdgeInsets.only(right: 12.0),
+//                 child: SizedBox(
+//                   width: width * 0.4,
+//                   child: ProductView(
+//                     data: _listProducts[index],
+//                     // newHero: widget.newHero,
+//                     onProductUpdate: () {
+//                       'onProductUpdate...'.log();
+//                       setState(() {
+//                         _listProducts.remove(_listProducts[index]);
+//                       });
+//                     },
+//                   ),
+//                 ),
+//               );
+//             },
+//           ),
+//         ),
+//       ],
+//     )

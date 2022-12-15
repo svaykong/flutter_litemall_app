@@ -8,12 +8,10 @@ class ProductSeeAllView extends StatelessWidget {
     Key? key,
     required this.seeAll,
     required this.data,
-    this.newHero = false,
   }) : super(key: key);
 
   final String seeAll;
   final List<ProductSubData> data;
-  final bool newHero;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +28,7 @@ class ProductSeeAllView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
         child: CardGridView(
           data: data,
-          newHero: newHero,
+          // newHero: newHero,
         ),
       ),
     );

@@ -1,32 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
+
+import 'package:provider/provider.dart';
+import 'package:toast/toast.dart';
 
 import '../../../models/product_model.dart';
 import '../../../utils/util.dart';
+import '../../../utils/widgets/more_action.dart';
+import '../../update_view/update_view.dart';
+import '../../../viewmodels/product_viewmodel/product_viewmodel.dart';
 import '../product_view/product_view_detail.dart';
 
 class ProductView extends StatelessWidget {
   const ProductView({
     Key? key,
+    required this.productType,
     required this.data,
-    this.newHero = false,
+    this.onProductUpdate,
   }) : super(key: key);
 
+  final String productType;
   final ProductSubData data;
-  final bool newHero;
+  final VoidCallback? onProductUpdate;
 
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-
+    final productViewModel = context.watch<ProductViewModel>();
+    ToastContext().init(context);
     return GestureDetector(
       onTap: () {
-        if (newHero) {
-          Navigator.of(context).pushReplacementNamed(ProductViewDetail.routeName, arguments: data);
-        } else {
-          Navigator.of(context).pushNamed(ProductViewDetail.routeName, arguments: ProductSubDataArguments(product: data));
-        }
+        Navigator.of(context).pushNamed(
+          ProductViewDetail.routeName,
+          arguments: ProductSubDataArguments(product: data, productType: productType),
+        );
       },
       child: SizedBox(
         width: width * 0.4,
@@ -37,19 +44,8 @@ class ProductView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              data.attributes.thumbnail.data != null
-                  ? Hero(
-                      tag: newHero
-                          ? data.attributes.thumbnail.data!.attributes.name + data.attributes.thumbnail.data!.attributes.url
-                          : data.attributes.thumbnail.data!.attributes.name,
-                      child: Image.network(
-                        Global.host + data.attributes.thumbnail.data!.attributes.url,
-                        fit: BoxFit.fill,
-                        width: double.infinity,
-                        height: height * 0.15,
-                      ),
-                    )
-                  : const Padding(
+              data.attributes.thumbnail.data == null
+                  ? const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
                         'Image not available',
@@ -58,6 +54,15 @@ class ProductView extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                    )
+                  : Hero(
+                      tag: 'product-view-$productType-${data.attributes.thumbnail.data!.attributes.url}',
+                      child: Image.network(
+                        Global.host + data.attributes.thumbnail.data!.attributes.url,
+                        fit: BoxFit.fill,
+                        width: double.infinity,
+                        height: height * 0.15,
                       ),
                     ),
               Padding(
@@ -95,50 +100,24 @@ class ProductView extends StatelessWidget {
                     ),
                     GestureDetector(
                       child: const Icon(Icons.more_vert),
-                      onTap: () {
-                        '${data.attributes.title} -- More click ...'.log();
-
-                        // Alert custom content
-                        Alert(
-                          context: context,
-                          // title: 'Product',
-                          // content: Column(
-                          //   children: const <Widget>[
-                          //     // TextField(
-                          //     //   decoration: InputDecoration(
-                          //     //     icon: Icon(Icons.account_circle),
-                          //     //     labelText: 'Username',
-                          //     //   ),
-                          //     // ),
-                          //     TextField(
-                          //       obscureText: true,
-                          //       decoration: InputDecoration(
-                          //         icon: Icon(Icons.lock),
-                          //         labelText: 'Password',
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
-                          buttons: [
-                            DialogButton(
-                              onPressed: () => Navigator.pop(context),
-                              color: Global.secondColor,
-                              child: const Text(
-                                'EDIT',
-                                style: TextStyle(color: Colors.white, fontSize: 20),
-                              ),
-                            ),
-                            DialogButton(
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.red,
-                              child: const Text(
-                                'DELETE',
-                                style: TextStyle(color: Colors.white, fontSize: 20),
-                              ),
-                            ),
-                          ],
-                        ).show();
-                      },
+                      onTap: () => moreAction(
+                        context: context,
+                        onEditPressed: () async => await Navigator.of(context)
+                            .pushNamed(
+                              UpdateView.routeName,
+                              arguments: UpdateProductArguments(product: data),
+                            )
+                            .then((value) => Navigator.of(context).pop()),
+                        onDeletePressed: () {
+                          productViewModel.deleteProduct(productId: data.id).then((value) {
+                            Navigator.of(context).pop();
+                            Toast.show('Success delete', gravity: Toast.top, duration: 3);
+                            if (onProductUpdate != null) {
+                              onProductUpdate!();
+                            }
+                          });
+                        },
+                      ),
                     ),
                   ],
                 ),

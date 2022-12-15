@@ -1,4 +1,4 @@
-import 'dart:convert' show jsonDecode;
+import 'dart:convert' show jsonDecode, jsonEncode;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -15,6 +15,10 @@ abstract class BaseNetworkApiService {
   Future<List<Data>> getCategories({required String url});
 
   Future<List<ProductSubData>> getProducts({required String url});
+
+  Future<bool> deleteProduct({required String url, required int productId});
+
+  Future<bool> updateProduct({required String url, required int productId, required ProductSubData requestBody});
 
   Future<Map<String, dynamic>> returnResponse({required Response response});
 }
@@ -59,6 +63,59 @@ class NetworkApiService implements BaseNetworkApiService {
       throw FetchDataException('NetworkApiService getProducts unexpected error : $e');
     } finally {
       'NetworkApiService getProducts finally'.log();
+    }
+  }
+
+  @override
+  Future<bool> deleteProduct({required String url, required int productId}) async {
+    'NetworkApiService deleteProduct call'.log();
+    try {
+      final Response response = await _client.delete(
+        Uri.parse(Uri.encodeFull('$url/$productId')),
+        headers: Global.headers,
+      );
+      'response :: ${response.body}'.log();
+      if (response.body.indexOf('"id":$productId') > -1) {
+        return true;
+      } else {
+        return false;
+      }
+    } on SocketException {
+      throw const FetchDataException('no internet connection');
+    } catch (e, stackTrace) {
+      'NetworkApiService deleteProduct error :: $e'.log();
+      'NetworkApiService deleteProduct StackTrace :: $stackTrace'.log();
+      throw FetchDataException('NetworkApiService deleteProduct unexpected error : $e');
+    } finally {
+      'NetworkApiService deleteProduct finally'.log();
+    }
+  }
+
+  @override
+  Future<bool> updateProduct({required String url, required int productId, required ProductSubData requestBody}) async {
+    'NetworkApiService updateProduct call'.log();
+    try {
+      final Response response = await _client.put(
+        Uri.parse(Uri.encodeFull('$url/$productId')),
+        headers: Global.headers,
+        body: jsonEncode(requestBody.toJson()),
+      );
+      'request body :: ${jsonEncode(requestBody.toJson())}'.log();
+      'response :: ${response.body}'.log();
+      // if (response.body.indexOf('"id":$productId') > -1) {
+      //   return true;
+      // } else {
+      //   return false;
+      // }
+      return true;
+    } on SocketException {
+      throw const FetchDataException('no internet connection');
+    } catch (e, stackTrace) {
+      'NetworkApiService updateProduct error :: $e'.log();
+      'NetworkApiService updateProduct StackTrace :: $stackTrace'.log();
+      throw FetchDataException('NetworkApiService updateProduct unexpected error : $e');
+    } finally {
+      'NetworkApiService updateProduct finally'.log();
     }
   }
 

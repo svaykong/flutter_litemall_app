@@ -14,19 +14,21 @@ class ProductsShowCase extends StatelessWidget {
     return Column(
       children: [
         // Featured Product showcase
-        productViewModel.featuredPro.isNotEmpty ? ProductContent(data: productViewModel.featuredPro) : const SizedBox.shrink(),
+        productViewModel.featuredPro.isNotEmpty ? ProductContent(productType: 'feature', data: productViewModel.featuredPro) : const SizedBox.shrink(),
 
         // Best Sellers showcase
-        productViewModel.bestSellerPro.isNotEmpty ? ProductContent(data: productViewModel.bestSellerPro) : const SizedBox.shrink(),
+        productViewModel.bestSellerPro.isNotEmpty ? ProductContent(productType: 'bestSeller', data: productViewModel.bestSellerPro) : const SizedBox.shrink(),
 
         // New Arrivals showcase
-        productViewModel.newArrivalPro.isNotEmpty ? ProductContent(data: productViewModel.newArrivalPro) : const SizedBox.shrink(),
+        productViewModel.newArrivalPro.isNotEmpty ? ProductContent(productType: 'newArrival', data: productViewModel.newArrivalPro) : const SizedBox.shrink(),
 
         // Top Rated Product showcase
-        productViewModel.topRatedPro.isNotEmpty ? ProductContent(data: productViewModel.topRatedPro) : const SizedBox.shrink(),
+        productViewModel.topRatedPro.isNotEmpty ? ProductContent(productType: 'topRated', data: productViewModel.topRatedPro) : const SizedBox.shrink(),
 
         // Top Rated Product showcase
-        productViewModel.specialOfferPro.isNotEmpty ? ProductContent(data: productViewModel.specialOfferPro) : const SizedBox.shrink(),
+        productViewModel.specialOfferPro.isNotEmpty
+            ? ProductContent(productType: 'specialOffer', data: productViewModel.specialOfferPro)
+            : const SizedBox.shrink(),
       ],
     );
   }

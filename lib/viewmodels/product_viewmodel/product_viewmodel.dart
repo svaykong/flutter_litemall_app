@@ -9,6 +9,10 @@ import '../../repo/product_repo/product_repo.dart';
 
 abstract class BaseProductViewModel with ChangeNotifier {
   Future<void> getProducts();
+
+  Future<void> deleteProduct({required int productId});
+
+  Future<void> updateProduct({required int productId, required ProductSubData requestBody});
 }
 
 class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
@@ -73,6 +77,7 @@ class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
 
   List<ProductSubData> get cartLists => _cartLists;
 
+  // get all products
   @override
   Future<void> getProducts() async {
     'ProductViewModel getProducts call'.log();
@@ -200,5 +205,39 @@ class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
   void removeAllFromCart() {
     _cartLists.clear();
     notifyListeners();
+  }
+
+  // Delete product
+  @override
+  Future<void> deleteProduct({required int productId}) async {
+    'ProductViewModel deleteProduct call'.log();
+    try {
+      Global.url = '${Global.host}${Global.baseUrl}/e-commerce-products';
+      await _productRepo.deleteProduct(url: Global.url, productId: productId);
+      notifyListeners();
+    } catch (e, stackTrace) {
+      'ProductViewModel deleteProduct error :: ${e.toString()}'.log();
+      'ProductViewModel deleteProduct stackTrace :: $stackTrace'.log();
+      // _products = ApiResponse.error(e.toString());
+    } finally {
+      'ProductViewModel deleteProduct finally'.log();
+    }
+  }
+
+  // update product
+  @override
+  Future<void> updateProduct({required int productId, required ProductSubData requestBody}) async {
+    'ProductViewModel updateProduct call'.log();
+    try {
+      Global.url = '${Global.host}${Global.baseUrl}/e-commerce-products';
+      await _productRepo.updateProduct(url: Global.url, productId: productId, requestBody: requestBody);
+      notifyListeners();
+    } catch (e, stackTrace) {
+      'ProductViewModel updateProduct error :: ${e.toString()}'.log();
+      'ProductViewModel updateProduct stackTrace :: $stackTrace'.log();
+      // _products = ApiResponse.error(e.toString());
+    } finally {
+      'ProductViewModel updateProduct finally'.log();
+    }
   }
 }

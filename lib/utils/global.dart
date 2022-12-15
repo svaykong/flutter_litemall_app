@@ -18,9 +18,14 @@ class Global {
 
   static const host = 'https://cms.istad.co';
   static const baseUrl = '/api';
+  static const headers = <String, String>{
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Accept': 'application/json',
+  };
   static var url = '';
   static var param = '';
 
+  static const ROOT = '/root';
   static const WISHLIST = '/wishlist';
   static const ORDER = '/order';
   static const ACCOUNT = '/account';
@@ -30,12 +35,13 @@ class Global {
   static const PRODUCT_VIEW_DETAIL = '/product_view_detail';
 
   static Map<String, Widget Function(BuildContext)> routes = <String, WidgetBuilder>{
-    WISHLIST: (_) => const WishListView(),
-    ORDER: (_) => const OrderView(),
-    ACCOUNT: (_) => const AccountView(),
-    NOTIFICATION: (_) => const NotificationView(),
-    CART: (_) => const CartView(),
-    SEARCH: (_) => const SearchView(),
+    ROOT: (_) => const RootView(),
+    WISHLIST: (ctx1) => const WishListView(),
+    ORDER: (ctx2) => const OrderView(),
+    ACCOUNT: (ctx3) => const AccountView(),
+    NOTIFICATION: (ctx4) => const NotificationView(),
+    CART: (ctx5) => const CartView(),
+    SEARCH: (ctx6) => const SearchView(),
   };
 
   // Provide a function to handle named routes.
@@ -43,22 +49,37 @@ class Global {
   // route being pushed, and create the correct
   // Screen.
   static Route<dynamic>? Function(RouteSettings)? onGenerateRoute = (settings) {
-    // If you push the PassArguments route
-    if (settings.name == ProductViewDetail.routeName) {
-      // Cast the arguments to the correct
-      // type: ScreenArguments.
-      final args = settings.arguments as ProductSubDataArguments;
+    switch (settings.name) {
+      // If you push the PassArguments route
+      case ProductViewDetail.routeName:
+        // Cast the arguments to the correct
+        // type: ScreenArguments.
+        final args = settings.arguments as ProductSubDataArguments;
 
-      // Then, extract the required data from
-      // the arguments and pass the data to the
-      // correct screen.
-      return MaterialPageRoute(
-        builder: (context) {
-          return ProductViewDetail(
+        // Then, extract the required data from
+        // the arguments and pass the data to the
+        // correct screen.
+        return MaterialPageRoute(
+          builder: (ctx7) {
+            return ProductViewDetail(
+              productType: args.productType,
+              product: args.product,
+            );
+          },
+        );
+
+      case CreateView.routeName:
+        return MaterialPageRoute(
+          builder: (ctx8) => const CreateView(),
+        );
+
+      case UpdateView.routeName:
+        final args = settings.arguments as UpdateProductArguments;
+        return MaterialPageRoute(
+          builder: (ctx9) => UpdateView(
             product: args.product,
-          );
-        },
-      );
+          ),
+        );
     }
     // The code only supports
     // PassArgumentsScreen.routeName right now.
@@ -77,6 +98,18 @@ class Global {
 // a customizable title and message.
 class ProductSubDataArguments {
   final ProductSubData product;
+  final String productType;
 
-  const ProductSubDataArguments({required this.product});
+  const ProductSubDataArguments({
+    required this.product,
+    required this.productType,
+  });
+}
+
+class UpdateProductArguments {
+  final ProductSubData product;
+
+  const UpdateProductArguments({
+    required this.product,
+  });
 }
