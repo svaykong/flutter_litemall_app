@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:litemall_app/utils/global.dart';
+
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../models/category_model.dart';
 
@@ -27,7 +30,18 @@ class CategoryView extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: IconButton(
               onPressed: onPressed,
-              icon: data.attributes.iconUrl.isNotEmpty ? Image.network(data.attributes.iconUrl) : const Text('No icon'),
+              icon: data.attributes.iconUrl.isNotEmpty
+                  ? Image.network(
+                      data.attributes.iconUrl,
+                      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return LoadingAnimationWidget.waveDots(
+                          color: Global.secondColor,
+                          size: 50,
+                        );
+                      },
+                    )
+                  : const Text('No icon'),
             ),
           ),
         ),

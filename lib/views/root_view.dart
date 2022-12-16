@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:toast/toast.dart';
@@ -159,11 +160,9 @@ class _RootViewState extends State<RootView> {
               snapshot.connectionState == ConnectionState.waiting ||
               snapshot.connectionState == ConnectionState.active) {
             return Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.5,
-                child: const LinearProgressIndicator(
-                  minHeight: 5,
-                ),
+              child: LoadingAnimationWidget.waveDots(
+                color: Global.secondColor,
+                size: 100,
               ),
             );
           }
@@ -199,7 +198,18 @@ class _RootViewState extends State<RootView> {
             }
           }
 
-          return const HomeView();
+          return RefreshIndicator(
+            onRefresh: () async {
+              await Future.delayed(
+                const Duration(seconds: 1),
+              );
+              setState(() {
+                _isLoading = true;
+                _loadDataFuture = _loadData();
+              });
+            },
+            child: const HomeView(),
+          );
         },
       ),
       bottomNavigationBar: Consumer<UserViewModel>(

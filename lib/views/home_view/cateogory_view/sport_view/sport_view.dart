@@ -24,7 +24,9 @@ class SportView extends StatelessWidget {
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-            child: CardGridView(data: sports),
+            child: CardGridView(data: sports,
+            productType: 'product_see_all_view_sport',
+            ),
           );
         },
       ),

@@ -21,3 +21,29 @@ extension Common on Object {
     return result;
   }
 }
+
+int getCategory(String value) {
+  int result = 1;
+  switch (value) {
+    case 'Shoes':
+      result = 1;
+      break;
+    case 'Clothes':
+      result = 2;
+      break;
+    case 'Foods':
+      result = 3;
+      break;
+    case 'Sport':
+      result = 4;
+      break;
+    case 'Computer':
+      result = 5;
+      break;
+    default:
+      result = 1;
+      break;
+  }
+  return result;
+}
+

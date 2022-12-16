@@ -64,7 +64,7 @@ class ProductViewDetail extends StatelessWidget {
                   : Card(
                       margin: EdgeInsets.zero,
                       child: Hero(
-                        tag: 'product-view-$productType-${product.attributes.thumbnail.data!.attributes.url}',
+                        tag: 'product-view-$productType-${product.attributes.thumbnail.data!.id}',
                         child: Image.network(
                           Global.host + product.attributes.thumbnail.data!.attributes.url,
                           fit: BoxFit.cover,

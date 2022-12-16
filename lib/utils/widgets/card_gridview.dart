@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
@@ -14,9 +15,11 @@ class CardGridView extends StatefulWidget {
   const CardGridView({
     Key? key,
     required this.data,
+    required this.productType,
   }) : super(key: key);
 
   final List<ProductSubData> data;
+  final String productType;
 
   @override
   State<CardGridView> createState() => _CardGridViewState();
@@ -74,12 +77,19 @@ class _CardGridViewState extends State<CardGridView> {
                         ),
                       )
                     : Hero(
-                        tag: 'product-view-card_grid-${_listCardGrid[index].attributes.thumbnail.data!.attributes.url}',
+                        tag: '${widget.productType}-$index-${_listCardGrid[index].attributes.thumbnail.data!.id}',
                         child: Image.network(
                           Global.host + _listCardGrid[index].attributes.thumbnail.data!.attributes.url,
-                          fit: BoxFit.fitHeight,
+                          fit: BoxFit.fill,
                           height: height * 0.13,
                           width: double.infinity,
+                          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return LoadingAnimationWidget.waveDots(
+                              color: Global.secondColor,
+                              size: 50,
+                            );
+                          },
                         ),
                       ),
                 Padding(
@@ -125,7 +135,10 @@ class _CardGridViewState extends State<CardGridView> {
                         ),
                         onPressed: () => moreAction(
                           context: context,
-                          onEditPressed: () async => await Navigator.of(context).pushNamed(UpdateView.routeName).then((value) => Navigator.of(context).pop()),
+                          onEditPressed: () async => await Navigator.of(context).pushNamed(UpdateView.routeName).then((value) {
+                            Navigator.of(context).pop();
+                            setState(() {});
+                          }),
                           onDeletePressed: () {
                             productViewModel.deleteProduct(productId: _listCardGrid[index].id).then((value) {
                               Navigator.of(context).pop();

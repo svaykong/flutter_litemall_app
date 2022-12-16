@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
@@ -57,12 +58,21 @@ class ProductView extends StatelessWidget {
                       ),
                     )
                   : Hero(
-                      tag: 'product-view-$productType-${data.attributes.thumbnail.data!.attributes.url}',
+                      tag: 'product-view-$productType-${data.attributes.thumbnail.data!.id}',
                       child: Image.network(
                         Global.host + data.attributes.thumbnail.data!.attributes.url,
                         fit: BoxFit.fill,
                         width: double.infinity,
                         height: height * 0.15,
+                        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: LoadingAnimationWidget.waveDots(
+                              color: Global.secondColor,
+                              size: 100,
+                            ),
+                          );
+                        },
                       ),
                     ),
               Padding(
@@ -98,25 +108,32 @@ class ProductView extends StatelessWidget {
                         ),
                       ],
                     ),
-                    GestureDetector(
-                      child: const Icon(Icons.more_vert),
-                      onTap: () => moreAction(
-                        context: context,
-                        onEditPressed: () async => await Navigator.of(context)
-                            .pushNamed(
-                              UpdateView.routeName,
-                              arguments: UpdateProductArguments(product: data),
-                            )
-                            .then((value) => Navigator.of(context).pop()),
-                        onDeletePressed: () {
-                          productViewModel.deleteProduct(productId: data.id).then((value) {
-                            Navigator.of(context).pop();
-                            Toast.show('Success delete', gravity: Toast.top, duration: 3);
-                            if (onProductUpdate != null) {
-                              onProductUpdate!();
-                            }
-                          });
-                        },
+                    StatefulBuilder(
+                      builder: (context, setState) => GestureDetector(
+                        child: const Icon(Icons.more_vert),
+                        onTap: () => moreAction(
+                          context: context,
+                          onEditPressed: () async => await Navigator.of(context)
+                              .pushNamed(
+                            UpdateView.routeName,
+                            arguments: UpdateProductArguments(product: data),
+                          )
+                              .then(
+                            (value) {
+                              Navigator.of(context).pop();
+                              setState(() {});
+                            },
+                          ),
+                          onDeletePressed: () {
+                            productViewModel.deleteProduct(productId: data.id).then((value) {
+                              Navigator.of(context).pop();
+                              Toast.show('Success delete', gravity: Toast.top, duration: 3);
+                              if (onProductUpdate != null) {
+                                onProductUpdate!();
+                              }
+                            });
+                          },
+                        ),
                       ),
                     ),
                   ],

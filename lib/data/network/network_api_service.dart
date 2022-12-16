@@ -3,8 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
+import '../../models/image_response.dart';
 import '../../models/category_model.dart';
 import '../../models/product_model.dart';
 import '../app_exception.dart';
@@ -20,7 +21,9 @@ abstract class BaseNetworkApiService {
 
   Future<bool> updateProduct({required String url, required int productId, required ProductSubData requestBody});
 
-  Future<Map<String, dynamic>> returnResponse({required Response response});
+  Future<ImageResponse> uploadImage({required File imgFile});
+
+  Future<Map<String, dynamic>> returnResponse({required http.Response response});
 }
 
 class NetworkApiService implements BaseNetworkApiService {
@@ -28,7 +31,7 @@ class NetworkApiService implements BaseNetworkApiService {
 
   static NetworkApiService getInstance() => const NetworkApiService._();
 
-  static final Client _client = Client();
+  static final http.Client _client = http.Client();
 
   @override
   Future<List<Data>> getCategories({required String url}) async {
@@ -52,7 +55,7 @@ class NetworkApiService implements BaseNetworkApiService {
   Future<List<ProductSubData>> getProducts({required String url}) async {
     'NetworkApiService getProducts call'.log();
     try {
-      final Response response = await _client.get(Uri.parse(url));
+      final http.Response response = await _client.get(Uri.parse(url));
       final resultJson = await returnResponse(response: response);
       return ProductModel.fromJson(resultJson).productListData;
     } on SocketException {
@@ -70,7 +73,7 @@ class NetworkApiService implements BaseNetworkApiService {
   Future<bool> deleteProduct({required String url, required int productId}) async {
     'NetworkApiService deleteProduct call'.log();
     try {
-      final Response response = await _client.delete(
+      final http.Response response = await _client.delete(
         Uri.parse(Uri.encodeFull('$url/$productId')),
         headers: Global.headers,
       );
@@ -95,19 +98,18 @@ class NetworkApiService implements BaseNetworkApiService {
   Future<bool> updateProduct({required String url, required int productId, required ProductSubData requestBody}) async {
     'NetworkApiService updateProduct call'.log();
     try {
-      final Response response = await _client.put(
+      final http.Response response = await _client.put(
         Uri.parse(Uri.encodeFull('$url/$productId')),
         headers: Global.headers,
         body: jsonEncode(requestBody.toJson()),
       );
-      'request body :: ${jsonEncode(requestBody.toJson())}'.log();
+      'jsonEncode :: ${jsonEncode(requestBody.toJson())}'.log();
       'response :: ${response.body}'.log();
-      // if (response.body.indexOf('"id":$productId') > -1) {
-      //   return true;
-      // } else {
-      //   return false;
-      // }
-      return true;
+      if (response.body.indexOf('"id":$productId') > -1) {
+        return true;
+      } else {
+        return false;
+      }
     } on SocketException {
       throw const FetchDataException('no internet connection');
     } catch (e, stackTrace) {
@@ -120,7 +122,32 @@ class NetworkApiService implements BaseNetworkApiService {
   }
 
   @override
-  Future<Map<String, dynamic>> returnResponse({required Response response}) async {
+  Future<ImageResponse> uploadImage({required File imgFile}) async {
+    'NetworkApiService uploadImage call'.log();
+    try {
+
+      Global.url = '/upload';
+      final http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse(Global.host + Global.baseUrl + Global.url));
+      request.files.add(await http.MultipartFile.fromPath('files', imgFile.path));
+      final http.StreamedResponse response = await request.send();
+      final resource = await response.stream.bytesToString();
+      print(resource);
+      final decode = jsonDecode(resource);
+      List<ImageResponse> imgResponse = List.from(decode).map((e) => ImageResponse.fromJson(e)).toList();
+      return imgResponse[0];
+    } on SocketException {
+      throw const FetchDataException('no internet connection');
+    } catch (e, stackTrace) {
+      'NetworkApiService uploadImage error :: $e'.log();
+      'NetworkApiService uploadImage StackTrace :: $stackTrace'.log();
+      throw FetchDataException('NetworkApiService uploadImage unexpected error : $e');
+    } finally {
+      'NetworkApiService uploadImage finally'.log();
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> returnResponse({required http.Response response}) async {
     switch (response.statusCode) {
       case 200:
         return jsonDecode(response.body);
@@ -133,15 +160,6 @@ class NetworkApiService implements BaseNetworkApiService {
     }
   }
 }
-
-// TODO: implement upload image
-// @override
-// Future<void> uploadImage() async {
-//   try {
-//   } on SocketException {
-//     throw const FetchDataException('no internet connection');
-//   }
-// }
 
 // TODO: implement post
 // @override

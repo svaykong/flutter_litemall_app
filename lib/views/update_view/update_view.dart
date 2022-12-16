@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:litemall_app/viewmodels/product_viewmodel/product_viewmodel.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
@@ -12,16 +11,19 @@ import '../../utils/common.dart';
 import '../../viewmodels/category_viewmodel/category_viewmodel.dart';
 import '../../models/product_model.dart';
 import '../../utils/global.dart';
+import '../../viewmodels/product_viewmodel/product_viewmodel.dart';
 
 class UpdateView extends StatefulWidget {
   const UpdateView({
     Key? key,
     required this.product,
+    this.onUpdate,
   }) : super(key: key);
 
   static const routeName = '/update_view';
 
   final ProductSubData product;
+  final VoidCallback? onUpdate;
 
   @override
   State<UpdateView> createState() => _UpdateViewState();
@@ -33,11 +35,12 @@ class _UpdateViewState extends State<UpdateView> {
   List<String>? _categoryItems;
   String? _categoryValue = '';
 
-  final GlobalKey _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleCtr;
   late final TextEditingController _descCtr;
   late final TextEditingController _priceCtr;
   late final TextEditingController _ratingCtr;
+  late final TextEditingController _quantityCtr;
   File? _imgFile;
 
   void _init() {
@@ -57,6 +60,7 @@ class _UpdateViewState extends State<UpdateView> {
     _descCtr = TextEditingController(text: widget.product.attributes.description);
     _priceCtr = TextEditingController(text: widget.product.attributes.price.toString());
     _ratingCtr = TextEditingController(text: widget.product.attributes.rating.toString());
+    _quantityCtr = TextEditingController(text: widget.product.attributes.quantity.toString());
   }
 
   Future<void> _onSelectImagePressed() async {
@@ -79,6 +83,9 @@ class _UpdateViewState extends State<UpdateView> {
   void dispose() {
     super.dispose();
     _titleCtr.dispose();
+    _descCtr.dispose();
+    _ratingCtr.dispose();
+    _priceCtr.dispose();
   }
 
   @override
@@ -86,9 +93,7 @@ class _UpdateViewState extends State<UpdateView> {
     ToastContext().init(context);
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Update Product'),
-      ),
+      appBar: AppBar(title: const Text('Update Product')),
       body: Form(
         key: _formKey,
         child: Center(
@@ -185,7 +190,14 @@ class _UpdateViewState extends State<UpdateView> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
+                child: TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Title cannot be empty';
+                    }
+                    return null;
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   controller: _titleCtr,
                   decoration: const InputDecoration(
                     label: Text('Title'),
@@ -198,7 +210,14 @@ class _UpdateViewState extends State<UpdateView> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
+                child: TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Description cannot be empty';
+                    }
+                    return null;
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   controller: _descCtr,
                   decoration: const InputDecoration(
                     label: Text('Description'),
@@ -211,7 +230,14 @@ class _UpdateViewState extends State<UpdateView> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
+                child: TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Price cannot be empty';
+                    }
+                    return null;
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   controller: _priceCtr,
                   decoration: const InputDecoration(
                     label: Text('Price'),
@@ -225,10 +251,38 @@ class _UpdateViewState extends State<UpdateView> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
+                child: TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Rating cannot be empty';
+                    }
+                    return null;
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   controller: _ratingCtr,
                   decoration: const InputDecoration(
                     label: Text('Rating'),
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(
+                height: 12.0,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Quantity cannot be empty';
+                    }
+                    return null;
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  controller: _quantityCtr,
+                  decoration: const InputDecoration(
+                    label: Text('Quantity'),
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
@@ -251,17 +305,34 @@ class _UpdateViewState extends State<UpdateView> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  Toast.show('Update success', gravity: Toast.top, duration: 3);
-                  Navigator.of(context).pop();
-
                   widget.product.attributes.title = _titleCtr.text;
                   widget.product.attributes.description = _descCtr.text;
                   widget.product.attributes.price = double.parse(_priceCtr.text.parseNum().toString());
                   widget.product.attributes.rating = double.parse(_ratingCtr.text.parseNum().toString());
-                  // if (widget.product.attributes.category.data != null) {
-                  //   widget.product.attributes.category.data!.id = getCategory(_categoryValue ?? '');
-                  // }
-                  _productViewModel.updateProduct(productId: widget.product.id, requestBody: widget.product);
+                  if (widget.product.attributes.category.data != null) {
+                    widget.product.attributes.category.data!.id = getCategory(_categoryValue ?? '');
+                  }
+                  widget.product.attributes.quantity = int.parse(_quantityCtr.text.parseNum().toString());
+                  'product :: ${widget.product.toJson()}'.log();
+                  if (_formKey.currentState!.validate()) {
+                    'imgFile path :: ${_imgFile?.path}'.log();
+
+                    int? thumbnailId = widget.product.attributes.thumbnail.data?.id;
+                    if (_imgFile != null) {
+                      await _productViewModel.uploadImage(imgFile: _imgFile!);
+                      thumbnailId = _productViewModel.imgResponse?.id;
+                    }
+                    widget.product.attributes.thumbnail.data?.id = thumbnailId!;
+                    await _productViewModel.updateProduct(productId: widget.product.id, requestBody: widget.product).then((status) {
+                      'response status :: $status'.log();
+                      if (status) {
+                        Toast.show('Update success', gravity: Toast.top, duration: 3);
+                      } else {
+                        Toast.show('Update failed', gravity: Toast.top, duration: 3);
+                      }
+                      Navigator.of(context).pushNamedAndRemoveUntil(Global.ROOT, (route) => false);
+                    });
+                  }
                 },
                 child: const Text('Update'),
               ),
@@ -270,31 +341,6 @@ class _UpdateViewState extends State<UpdateView> {
         ),
       ),
     );
-  }
-
-  int getCategory(String value) {
-    int result = 1;
-    switch (value) {
-      case 'Shoes':
-        result = 1;
-        break;
-      case 'Clothes':
-        result = 2;
-        break;
-      case 'Foods':
-        result = 3;
-        break;
-      case 'Sport':
-        result = 4;
-        break;
-      case 'Computer':
-        result = 5;
-        break;
-      default:
-        result = 1;
-        break;
-    }
-    return result;
   }
 
   DropdownMenuItem<String> _buildMenuItem(String item) => DropdownMenuItem(

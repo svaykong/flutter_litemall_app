@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:litemall_app/models/image_response.dart';
 
 import '../../data/response/api_response.dart';
 import '../../models/category_model.dart';
@@ -12,7 +15,9 @@ abstract class BaseProductViewModel with ChangeNotifier {
 
   Future<void> deleteProduct({required int productId});
 
-  Future<void> updateProduct({required int productId, required ProductSubData requestBody});
+  Future<bool> updateProduct({required int productId, required ProductSubData requestBody});
+
+  Future<void> uploadImage({required File imgFile});
 }
 
 class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
@@ -76,6 +81,10 @@ class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
   List<ProductSubData> _cartLists = [];
 
   List<ProductSubData> get cartLists => _cartLists;
+
+  ImageResponse? _imgResponse;
+
+  ImageResponse? get imgResponse => _imgResponse;
 
   // get all products
   @override
@@ -226,18 +235,40 @@ class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
 
   // update product
   @override
-  Future<void> updateProduct({required int productId, required ProductSubData requestBody}) async {
+  Future<bool> updateProduct({required int productId, required ProductSubData requestBody}) async {
     'ProductViewModel updateProduct call'.log();
+
     try {
       Global.url = '${Global.host}${Global.baseUrl}/e-commerce-products';
-      await _productRepo.updateProduct(url: Global.url, productId: productId, requestBody: requestBody);
+      final response = await _productRepo.updateProduct(url: Global.url, productId: productId, requestBody: requestBody);
+
+      _loopProduct();
+
       notifyListeners();
+      return response;
     } catch (e, stackTrace) {
       'ProductViewModel updateProduct error :: ${e.toString()}'.log();
       'ProductViewModel updateProduct stackTrace :: $stackTrace'.log();
       // _products = ApiResponse.error(e.toString());
+      return false;
     } finally {
       'ProductViewModel updateProduct finally'.log();
+    }
+  }
+
+  @override
+  Future<void> uploadImage({required File imgFile}) async {
+    'ProductViewModel uploadImage call'.log();
+    try {
+      final ImageResponse response = await _productRepo.uploadImage(imgFile: imgFile);
+      _imgResponse = response;
+      notifyListeners();
+    } catch (e, stackTrace) {
+      'ProductViewModel uploadImage error :: ${e.toString()}'.log();
+      'ProductViewModel uploadImage stackTrace :: $stackTrace'.log();
+      // _products = ApiResponse.error(e.toString());
+    } finally {
+      'ProductViewModel uploadImage finally'.log();
     }
   }
 }

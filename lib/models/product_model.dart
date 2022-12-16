@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:equatable/equatable.dart';
 
 import '../utils/util.dart';
@@ -46,9 +44,10 @@ class ProductSubData extends Equatable {
     subData['rating'] = attributes.rating.toString();
     subData['description'] = attributes.description;
     subData['quantity'] = attributes.quantity.toString();
-    subData['category'] = attributes.category.data!.id.toString();
-    subData['thumbnail'] = null; //attributes.thumbnail.id.toString();
+    subData['category'] = attributes.category.data?.id;
+    subData['thumbnail'] = attributes.thumbnail.data?.id;
     subData['price'] = attributes.price.toString();
+    subData['quantity'] = attributes.quantity.toString();
 
     final Map<String, dynamic> data = <String, dynamic>{};
     data['data'] = subData;
@@ -207,36 +206,33 @@ class ProductSubCategorySubData extends Equatable {
 
 class Thumbnail extends Equatable {
   const Thumbnail({
-    required this.id,
     this.data,
   });
 
-  final int id;
   final ThumbnailSubData? data;
 
   factory Thumbnail.fromJson(Map<String, dynamic> json) {
     return Thumbnail(
-      id: json['id'].toString().parseNum().toInt(),
       data: json['data'] != null ? ThumbnailSubData.fromJson(json['data']) : null,
     );
   }
 
   @override
-  List<Object?> get props => [id, data];
+  List<Object?> get props => [data];
 }
 
 class ThumbnailSubData extends Equatable {
-  const ThumbnailSubData({
+  ThumbnailSubData({
     required this.id,
     required this.attributes,
   });
 
-  final int id;
+  int id;
   final ThumbnailSubAttributes attributes;
 
   factory ThumbnailSubData.fromJson(Map<String, dynamic> json) {
     return ThumbnailSubData(
-      id: json['int'].toString().parseNum().toInt(),
+      id: json['id'].toString().parseNum().toInt(),
       attributes: ThumbnailSubAttributes.fromJson(json['attributes']),
     );
   }

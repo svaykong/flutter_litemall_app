@@ -24,7 +24,10 @@ class ComputerView extends StatelessWidget {
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-            child: CardGridView(data: computers),
+            child: CardGridView(
+              data: computers,
+              productType: 'product_see_all_view_computer',
+            ),
           );
         },
       ),

@@ -28,6 +28,7 @@ class ProductSeeAllView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
         child: CardGridView(
           data: data,
+          productType: 'product_see_all_view',
           // newHero: newHero,
         ),
       ),

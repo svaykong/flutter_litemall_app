@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 
+import '../create_view/create_view.dart';
 import '../../viewmodels/user_viewmodel/user_viewmodel.dart';
 import '../../utils/util.dart';
 
@@ -163,12 +164,25 @@ class _AccountViewState extends State<AccountView> {
               },
             ),
             const Padding(
-              padding: EdgeInsets.only(top: 16.0),
+              padding: EdgeInsets.only(top: 16.0, left: 8),
               child: Text(
                 'My Account Info',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 16,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pushNamed(CreateView.routeName),
+                child: const Text(
+                  'Create Product',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),

@@ -24,7 +24,7 @@ class ClothView extends StatelessWidget {
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-            child: CardGridView(data: clothes),
+            child: CardGridView(data: clothes, productType: 'product_see_all_view_clothes',),
           );
         },
       ),
