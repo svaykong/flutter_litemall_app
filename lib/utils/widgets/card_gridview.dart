@@ -28,6 +28,9 @@ class CardGridView extends StatefulWidget {
 class _CardGridViewState extends State<CardGridView> {
   List<ProductSubData> _listCardGrid = [];
 
+  // loading delete status
+  bool _loading = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,127 +42,146 @@ class _CardGridViewState extends State<CardGridView> {
     ToastContext().init(context);
     final height = MediaQuery.of(context).size.height;
     final productViewModel = context.watch<ProductViewModel>();
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.0,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 32.0,
-      ),
-      padding: EdgeInsets.zero,
-      itemCount: _listCardGrid.length,
-      itemBuilder: (BuildContext context, int index) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => ProductViewDetail(
-                  productType: 'card_grid',
-                  product: _listCardGrid[index],
-                ),
-              ),
-            );
-          },
-          child: Card(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _listCardGrid[index].attributes.thumbnail.data == null
-                    ? const Padding(
-                        padding: EdgeInsets.only(left: 8.0),
+    return _loading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 10.0,
+              mainAxisSpacing: 32.0,
+            ),
+            padding: EdgeInsets.zero,
+            itemCount: _listCardGrid.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ProductViewDetail(
+                        productType: 'card_grid',
+                        product: _listCardGrid[index],
+                      ),
+                    ),
+                  );
+                },
+                child: Card(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _listCardGrid[index].attributes.thumbnail.data == null
+                          ? const Padding(
+                              padding: EdgeInsets.only(left: 8.0),
+                              child: Text(
+                                'Image not available',
+                                style: TextStyle(
+                                  color: Global.thirdColor,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            )
+                          : Hero(
+                              tag: '${widget.productType}-$index-${_listCardGrid[index].attributes.thumbnail.data!.id}',
+                              child: Image.network(
+                                Global.host + _listCardGrid[index].attributes.thumbnail.data!.attributes.url,
+                                fit: BoxFit.fill,
+                                height: height * 0.13,
+                                width: double.infinity,
+                                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return LoadingAnimationWidget.waveDots(
+                                    color: Global.secondColor,
+                                    size: 50,
+                                  );
+                                },
+                              ),
+                            ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0, top: 8.0),
                         child: Text(
-                          'Image not available',
-                          style: TextStyle(
+                          _listCardGrid[index].attributes.title,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: const TextStyle(
                             color: Global.thirdColor,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                      )
-                    : Hero(
-                        tag: '${widget.productType}-$index-${_listCardGrid[index].attributes.thumbnail.data!.id}',
-                        child: Image.network(
-                          Global.host + _listCardGrid[index].attributes.thumbnail.data!.attributes.url,
-                          fit: BoxFit.fill,
-                          height: height * 0.13,
-                          width: double.infinity,
-                          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return LoadingAnimationWidget.waveDots(
-                              color: Global.secondColor,
-                              size: 50,
-                            );
-                          },
-                        ),
                       ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0, top: 8.0),
-                  child: Text(
-                    _listCardGrid[index].attributes.title,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: const TextStyle(
-                      color: Global.thirdColor,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '\$ ${_listCardGrid[index].attributes.price}',
-                        style: const TextStyle(
-                          color: Global.tenColor,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star,
-                            size: 16,
-                            color: Global.elevenColor,
-                          ),
-                          Text('${_listCardGrid[index].attributes.rating}'),
-                        ],
-                      ),
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        icon: const Icon(
-                          Icons.more_vert,
-                          size: 18,
-                        ),
-                        onPressed: () => moreAction(
-                          context: context,
-                          onEditPressed: () async {
-                            Navigator.of(context).pop();
-                            await Navigator.of(context).pushNamed(UpdateView.routeName).then((value) {
-                              setState(() {});
-                            });
-                          },
-                          onDeletePressed: () {
-                            productViewModel.deleteProduct(productId: _listCardGrid[index].id).then((value) {
-                              Navigator.of(context).pop();
-                              Toast.show('Success delete', gravity: Toast.top, duration: 3);
-                              setState(() {
-                                _listCardGrid.remove(_listCardGrid[index]);
-                              });
-                            });
-                          },
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '\$ ${_listCardGrid[index].attributes.price}',
+                              style: const TextStyle(
+                                color: Global.tenColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  size: 16,
+                                  color: Global.elevenColor,
+                                ),
+                                Text('${_listCardGrid[index].attributes.rating}'),
+                              ],
+                            ),
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: const Icon(
+                                Icons.more_vert,
+                                size: 18,
+                              ),
+                              onPressed: () => moreAction(
+                                context: context,
+                                onEditPressed: () async {
+                                  Navigator.of(context).pop();
+                                  await Navigator.of(context)
+                                      .pushNamed(
+                                    UpdateView.routeName,
+                                    arguments: UpdateProductArguments(product: _listCardGrid[index]),
+                                  )
+                                      .then(
+                                    (value) {
+                                      setState(() {});
+                                    },
+                                  );
+                                },
+                                onDeletePressed: () async {
+                                  Navigator.of(context).pop();
+                                  setState(() {
+                                    _loading = true;
+                                  });
+                                  final status = await productViewModel.deleteProduct(productId: _listCardGrid[index].id);
+                                  if (status) {
+                                    Toast.show('Success delete', gravity: Toast.top, duration: 3);
+                                    _listCardGrid.remove(_listCardGrid[index]);
+                                  } else {
+                                    Toast.show('Failed to delete', gravity: Toast.top, duration: 3);
+                                  }
+                                  await Future.delayed(const Duration(seconds: 1));
+                                  setState(() {
+                                    _loading = false;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+              );
+            },
+          );
   }
 }

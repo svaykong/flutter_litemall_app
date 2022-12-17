@@ -86,6 +86,7 @@ class CategoryDetailView extends StatelessWidget {
                 ),
                 onPressed: () {
                   'Filter & Sorting pressed ...'.log();
+                  Toast.show('Currently filter is not available...', duration: 3, gravity: Toast.top);
                 },
                 child: const Text(
                   'Filter & Sorting',

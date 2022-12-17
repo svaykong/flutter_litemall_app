@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
@@ -70,16 +71,27 @@ class _UpdateViewState extends State<UpdateView> {
     final result = await FilePicker.platform.pickFiles(allowMultiple: false);
     if (result == null) return;
 
+    final imgPath = result.files.first.path.toString();
+
+    ImageProperties properties = await FlutterNativeImage.getImageProperties(imgPath);
+    final height = properties.height ?? 300;
+    final width = properties.width ?? 600;
+    File compressedFile = await FlutterNativeImage.compressImage(
+      imgPath,
+      quality: 80,
+      targetWidth: 600,
+      targetHeight: (height * 600 / width).round(),
+    );
+
     setState(() {
-      final imgPath = result.files.first.path.toString();
-      _imgFile = File(imgPath);
+      _imgFile = compressedFile;
       // remove the old image
       widget.product.attributes.thumbnail.data = null;
     });
   }
 
-  // upload image button pressed
-  Future<void> _onUploadImagePressed() async {
+  // upload product button pressed
+  Future<void> _onUpDateProductPressed() async {
     widget.product.attributes.title = _titleCtr.text;
     widget.product.attributes.description = _descCtr.text;
     widget.product.attributes.price = double.parse(_priceCtr.text.parseNum().toString());
@@ -89,46 +101,51 @@ class _UpdateViewState extends State<UpdateView> {
     }
     widget.product.attributes.quantity = int.parse(_quantityCtr.text.parseNum().toString());
     'product :: ${widget.product.toJson()}'.log();
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _loading = true;
-      });
 
-      'imgFile path :: ${_imgFile?.path}'.log();
-      if (_imgFile != null) {
-        await _productViewModel.uploadImage(imgFile: _imgFile!).then((value) => 'upload response status :: $value'.log());
-        'response upload image :: ${_productViewModel.imgResponse}'.log();
-        if (widget.product.attributes.thumbnail.data != null) {
-          widget.product.attributes.thumbnail.data!.id = _productViewModel.imgResponse!.id!;
-        } else {
-          // case thumbnail data: null
-          final Map<String, dynamic> jsonObject = <String, dynamic>{};
+    if (_categoryValue == null || _categoryValue!.isEmpty) {
+      Toast.show('Please select categories!!!', gravity: Toast.top, duration: 3);
+    } else {
+      if (_formKey.currentState!.validate()) {
+        setState(() {
+          _loading = true;
+        });
 
-          final Map<String, dynamic> jsonObject2 = <String, dynamic>{};
-          jsonObject2['name'] = _productViewModel.imgResponse!.name;
-          jsonObject2['url'] = _productViewModel.imgResponse!.url;
+        'imgFile path :: ${_imgFile?.path}'.log();
+        if (_imgFile != null) {
+          await _productViewModel.uploadImage(imgFile: _imgFile!).then((value) => 'upload response status :: $value'.log());
+          'response upload image :: ${_productViewModel.imgResponse}'.log();
+          if (widget.product.attributes.thumbnail.data != null) {
+            widget.product.attributes.thumbnail.data!.id = _productViewModel.imgResponse!.id!;
+          } else {
+            // case thumbnail data: null
+            final Map<String, dynamic> jsonObject = <String, dynamic>{};
 
-          jsonObject['id'] = _productViewModel.imgResponse!.id!;
-          jsonObject['attributes'] = jsonObject2;
+            final Map<String, dynamic> jsonObject2 = <String, dynamic>{};
+            jsonObject2['name'] = _productViewModel.imgResponse!.name;
+            jsonObject2['url'] = _productViewModel.imgResponse!.url;
 
-          final Map<String, dynamic> jsonObject3 = <String, dynamic>{};
-          jsonObject3['data'] = jsonObject;
-          widget.product.attributes.thumbnail = Thumbnail.fromJson(jsonObject3);
+            jsonObject['id'] = _productViewModel.imgResponse!.id!;
+            jsonObject['attributes'] = jsonObject2;
+
+            final Map<String, dynamic> jsonObject3 = <String, dynamic>{};
+            jsonObject3['data'] = jsonObject;
+            widget.product.attributes.thumbnail = Thumbnail.fromJson(jsonObject3);
+          }
         }
+
+        await _productViewModel.updateProduct(productId: widget.product.id, requestBody: widget.product).then((status) {
+          'response update product status :: $status'.log();
+          if (status) {
+            Toast.show('Update success', gravity: Toast.top, duration: 3);
+          } else {
+            Toast.show('Update failed', gravity: Toast.top, duration: 3);
+          }
+        });
+
+        await Future.delayed(const Duration(seconds: 1)).then(
+          (value) => Navigator.of(context).popUntil((route) => route.isFirst),
+        );
       }
-
-      await _productViewModel.updateProduct(productId: widget.product.id, requestBody: widget.product).then((status) {
-        'response update product status :: $status'.log();
-        if (status) {
-          Toast.show('Update success', gravity: Toast.top, duration: 3);
-        } else {
-          Toast.show('Update failed', gravity: Toast.top, duration: 3);
-        }
-      });
-
-      await Future.delayed(const Duration(seconds: 1)).then(
-        (value) => Navigator.of(context).popUntil((route) => route.isFirst),
-      );
     }
   }
 
@@ -158,7 +175,7 @@ class _UpdateViewState extends State<UpdateView> {
               child: CircularProgressIndicator(),
             )
           : SingleChildScrollView(
-            child: Form(
+              child: Form(
                 key: _formKey,
                 child: Center(
                   child: Column(
@@ -371,14 +388,14 @@ class _UpdateViewState extends State<UpdateView> {
                         height: 12.0,
                       ),
                       ElevatedButton(
-                        onPressed: _onUploadImagePressed,
+                        onPressed: _onUpDateProductPressed,
                         child: const Text('Update'),
                       ),
                     ],
                   ),
                 ),
               ),
-          ),
+            ),
     );
   }
 

@@ -13,7 +13,7 @@ import '../../repo/product_repo/product_repo.dart';
 abstract class BaseProductViewModel with ChangeNotifier {
   Future<void> getProducts();
 
-  Future<void> deleteProduct({required int productId});
+  Future<bool> deleteProduct({required int productId});
 
   Future<bool> updateProduct({required int productId, required ProductSubData requestBody});
 
@@ -220,16 +220,17 @@ class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
 
   // Delete product
   @override
-  Future<void> deleteProduct({required int productId}) async {
+  Future<bool> deleteProduct({required int productId}) async {
     'ProductViewModel deleteProduct call'.log();
     try {
       Global.url = '${Global.host}${Global.baseUrl}/e-commerce-products';
-      await _productRepo.deleteProduct(url: Global.url, productId: productId);
       notifyListeners();
+      return await _productRepo.deleteProduct(url: Global.url, productId: productId);
     } catch (e, stackTrace) {
       'ProductViewModel deleteProduct error :: ${e.toString()}'.log();
       'ProductViewModel deleteProduct stackTrace :: $stackTrace'.log();
       // _products = ApiResponse.error(e.toString());
+      return false;
     } finally {
       'ProductViewModel deleteProduct finally'.log();
     }
