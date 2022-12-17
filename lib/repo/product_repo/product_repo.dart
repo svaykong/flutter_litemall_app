@@ -12,6 +12,8 @@ abstract class BaseProductRepo {
   Future<bool> updateProduct({required String url, required int productId, required ProductSubData requestBody});
 
   Future<ImageResponse> uploadImage({required File imgFile});
+
+  Future<bool> createProduct({required Map<String, dynamic> requestBody});
 }
 
 class ProductRepo implements BaseProductRepo {
@@ -42,5 +44,10 @@ class ProductRepo implements BaseProductRepo {
   @override
   Future<ImageResponse> uploadImage({required File imgFile}) async {
     return await _apiService.uploadImage(imgFile: imgFile);
+  }
+
+  @override
+  Future<bool> createProduct({required Map<String, dynamic> requestBody}) async {
+    return await _apiService.createProduct(requestBody: requestBody);
   }
 }

@@ -113,17 +113,19 @@ class ProductView extends StatelessWidget {
                         child: const Icon(Icons.more_vert),
                         onTap: () => moreAction(
                           context: context,
-                          onEditPressed: () async => await Navigator.of(context)
-                              .pushNamed(
-                            UpdateView.routeName,
-                            arguments: UpdateProductArguments(product: data),
-                          )
-                              .then(
-                            (value) {
-                              Navigator.of(context).pop();
-                              setState(() {});
-                            },
-                          ),
+                          onEditPressed: () async {
+                            Navigator.of(context).pop();
+                            await Navigator.of(context)
+                                .pushNamed(
+                              UpdateView.routeName,
+                              arguments: UpdateProductArguments(product: data),
+                            )
+                                .then(
+                              (value) {
+                                setState(() {});
+                              },
+                            );
+                          },
                           onDeletePressed: () {
                             productViewModel.deleteProduct(productId: data.id).then((value) {
                               Navigator.of(context).pop();

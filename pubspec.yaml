@@ -31,6 +31,7 @@ dependencies:
   share_plus: ^6.3.0
   rflutter_alert: ^2.0.4
   loading_animation_widget: ^1.2.0+4
+  flutter_native_image: ^0.0.6+1
 
 dev_dependencies:
   flutter_test:

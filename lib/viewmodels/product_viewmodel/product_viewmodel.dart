@@ -18,6 +18,8 @@ abstract class BaseProductViewModel with ChangeNotifier {
   Future<bool> updateProduct({required int productId, required ProductSubData requestBody});
 
   Future<void> uploadImage({required File imgFile});
+
+  Future<bool> createProduct({required Map<String, dynamic> requestBody});
 }
 
 class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
@@ -241,9 +243,6 @@ class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
     try {
       Global.url = '${Global.host}${Global.baseUrl}/e-commerce-products';
       final response = await _productRepo.updateProduct(url: Global.url, productId: productId, requestBody: requestBody);
-
-      _loopProduct();
-
       notifyListeners();
       return response;
     } catch (e, stackTrace) {
@@ -257,18 +256,40 @@ class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
   }
 
   @override
-  Future<void> uploadImage({required File imgFile}) async {
+  Future<bool> uploadImage({required File imgFile}) async {
     'ProductViewModel uploadImage call'.log();
     try {
       final ImageResponse response = await _productRepo.uploadImage(imgFile: imgFile);
-      _imgResponse = response;
-      notifyListeners();
+      'uploadImage response :: $response'.log();
+      'image_id :: ${response.id} -- image_name :: ${response.name}'.log();
+      if (response.id != null) {
+        _imgResponse = response;
+        return true;
+      } else {
+        return false;
+      }
     } catch (e, stackTrace) {
       'ProductViewModel uploadImage error :: ${e.toString()}'.log();
       'ProductViewModel uploadImage stackTrace :: $stackTrace'.log();
       // _products = ApiResponse.error(e.toString());
+      return false;
     } finally {
       'ProductViewModel uploadImage finally'.log();
+    }
+  }
+
+  @override
+  Future<bool> createProduct({required Map<String, dynamic> requestBody}) async {
+    'ProductViewModel createProduct call'.log();
+    try {
+      return _productRepo.createProduct(requestBody: requestBody);
+    } catch (e, stackTrace) {
+      'ProductViewModel createProduct error :: ${e.toString()}'.log();
+      'ProductViewModel createProduct stackTrace :: $stackTrace'.log();
+      // _products = ApiResponse.error(e.toString());
+      return false;
+    } finally {
+      'ProductViewModel createProduct finally'.log();
     }
   }
 }

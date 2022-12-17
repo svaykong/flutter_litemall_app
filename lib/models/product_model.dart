@@ -44,10 +44,32 @@ class ProductSubData extends Equatable {
     subData['rating'] = attributes.rating.toString();
     subData['description'] = attributes.description;
     subData['quantity'] = attributes.quantity.toString();
-    subData['category'] = attributes.category.data?.id;
-    subData['thumbnail'] = attributes.thumbnail.data?.id;
+    subData['category'] = attributes.category.data?.id.toString();
+    subData['thumbnail'] = attributes.thumbnail.data?.id.toString();
     subData['price'] = attributes.price.toString();
-    subData['quantity'] = attributes.quantity.toString();
+
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['data'] = subData;
+    return data;
+  }
+
+  static Map<String, dynamic> toJsonBody({
+    required String title,
+    required String rating,
+    required String description,
+    required String quantity,
+    required String category,
+    required String thumbnail,
+    required String price,
+  }) {
+    final Map<String, dynamic> subData = <String, dynamic>{};
+    subData['title'] = title;
+    subData['rating'] = double.parse(rating).toString();
+    subData['description'] = description;
+    subData['quantity'] = quantity;
+    subData['category'] = category;
+    subData['thumbnail'] = thumbnail;
+    subData['price'] = double.parse(price).toString();
 
     final Map<String, dynamic> data = <String, dynamic>{};
     data['data'] = subData;
@@ -205,11 +227,11 @@ class ProductSubCategorySubData extends Equatable {
 //
 
 class Thumbnail extends Equatable {
-  const Thumbnail({
+  Thumbnail({
     this.data,
   });
 
-  final ThumbnailSubData? data;
+  ThumbnailSubData? data;
 
   factory Thumbnail.fromJson(Map<String, dynamic> json) {
     return Thumbnail(

@@ -84,7 +84,7 @@ class _ProductContentState extends State<ProductContent> {
                 child: SizedBox(
                   width: width * 0.4,
                   child: ProductView(
-                    productType: widget.productType,
+                    productType: '${widget.productType}--$index--',
                     data: _listProducts[index],
                     onProductUpdate: () {
                       'onProductUpdate...'.log();

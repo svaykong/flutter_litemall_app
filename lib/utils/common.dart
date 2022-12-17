@@ -16,7 +16,7 @@ extension Common on Object {
         result = num.parse(toString().replaceAll('\$', ''));
       }
     } catch (e) {
-      'parseNum invalid value :: ${toString()}'.log();
+      // 'parseNum invalid value :: ${toString()}'.log();
     }
     return result;
   }
@@ -46,4 +46,3 @@ int getCategory(String value) {
   }
   return result;
 }
-

@@ -27,12 +27,13 @@ class _AccountViewState extends State<AccountView> {
     if (result == null) return;
 
     _imgPath = result.files.first.path.toString();
-    _imageFile = File(_imgPath);
 
     _userViewModel.filePath = _imgPath;
     _userViewModel.saveImgPathToLocalData();
 
-    setState(() {});
+    setState(() {
+      _imageFile = File(_imgPath);
+    });
   }
 
   void _init() async {

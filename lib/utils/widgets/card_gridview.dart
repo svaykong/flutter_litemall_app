@@ -135,10 +135,12 @@ class _CardGridViewState extends State<CardGridView> {
                         ),
                         onPressed: () => moreAction(
                           context: context,
-                          onEditPressed: () async => await Navigator.of(context).pushNamed(UpdateView.routeName).then((value) {
+                          onEditPressed: () async {
                             Navigator.of(context).pop();
-                            setState(() {});
-                          }),
+                            await Navigator.of(context).pushNamed(UpdateView.routeName).then((value) {
+                              setState(() {});
+                            });
+                          },
                           onDeletePressed: () {
                             productViewModel.deleteProduct(productId: _listCardGrid[index].id).then((value) {
                               Navigator.of(context).pop();

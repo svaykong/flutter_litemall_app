@@ -23,6 +23,8 @@ abstract class BaseNetworkApiService {
 
   Future<ImageResponse> uploadImage({required File imgFile});
 
+  Future<bool> createProduct({required Map<String, dynamic> requestBody});
+
   Future<Map<String, dynamic>> returnResponse({required http.Response response});
 }
 
@@ -103,7 +105,7 @@ class NetworkApiService implements BaseNetworkApiService {
         headers: Global.headers,
         body: jsonEncode(requestBody.toJson()),
       );
-      'jsonEncode :: ${jsonEncode(requestBody.toJson())}'.log();
+      'jsonEncode updateProduct :: ${jsonEncode(requestBody.toJson())}'.log();
       'response :: ${response.body}'.log();
       if (response.body.indexOf('"id":$productId') > -1) {
         return true;
@@ -125,7 +127,6 @@ class NetworkApiService implements BaseNetworkApiService {
   Future<ImageResponse> uploadImage({required File imgFile}) async {
     'NetworkApiService uploadImage call'.log();
     try {
-
       Global.url = '/upload';
       final http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse(Global.host + Global.baseUrl + Global.url));
       request.files.add(await http.MultipartFile.fromPath('files', imgFile.path));
@@ -147,6 +148,34 @@ class NetworkApiService implements BaseNetworkApiService {
   }
 
   @override
+  Future<bool> createProduct({required Map<String, dynamic> requestBody}) async {
+    'NetworkApiService createProduct call'.log();
+    try {
+      Global.url = '${Global.host}${Global.baseUrl}/e-commerce-products';
+      final http.Response response = await _client.post(
+        Uri.parse(Uri.encodeFull(Global.url)),
+        headers: Global.headers,
+        body: jsonEncode(requestBody),
+      );
+      'jsonEncode createProduct :: ${jsonEncode(requestBody)}'.log();
+      'response :: ${response.body}'.log();
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } on SocketException {
+      throw const FetchDataException('no internet connection');
+    } catch (e, stackTrace) {
+      'NetworkApiService createProduct error :: $e'.log();
+      'NetworkApiService createProduct StackTrace :: $stackTrace'.log();
+      throw FetchDataException('NetworkApiService createProduct unexpected error : $e');
+    } finally {
+      'NetworkApiService createProduct finally'.log();
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>> returnResponse({required http.Response response}) async {
     switch (response.statusCode) {
       case 200:
@@ -160,19 +189,3 @@ class NetworkApiService implements BaseNetworkApiService {
     }
   }
 }
-
-// TODO: implement post
-// @override
-// Future<bool> post(String url) async {
-//   try {
-//     final response = await _client.post(Uri.parse(url));
-//     final json = await returnJsonResponse(response);
-//     return false;
-//   } on SocketException {
-//     throw const FetchDataException('no internet connection');
-//   } catch (e) {
-//     print('post error : $e');
-//     throw FetchDataException('post unexpected error : $e');
-//   }
-// }
-// }
