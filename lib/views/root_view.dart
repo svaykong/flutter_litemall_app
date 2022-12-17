@@ -31,6 +31,7 @@ class _RootViewState extends State<RootView> {
 
   late CategoryViewModel _categoryViewModel;
   late ProductViewModel _productViewModel;
+  late UserViewModel _userViewModel;
   Future<void>? _loadDataFuture;
   bool _isLoading = false;
 
@@ -91,6 +92,8 @@ class _RootViewState extends State<RootView> {
     _isLoading = true;
     _categoryViewModel = Provider.of<CategoryViewModel>(context, listen: false);
     _productViewModel = Provider.of<ProductViewModel>(context, listen: false);
+    _userViewModel = Provider.of<UserViewModel>(context, listen: false)..getImgPathFromLocalData();
+
     await Future.delayed(
       const Duration(seconds: 5),
     );
@@ -213,7 +216,9 @@ class _RootViewState extends State<RootView> {
         },
       ),
       bottomNavigationBar: Consumer<UserViewModel>(
-        builder: (_, user, __) => const BottomNavBar(),
+        builder: (_, user, __) => BottomNavBar(
+          filePath: _userViewModel.filePath,
+        ),
       ),
     );
   }
