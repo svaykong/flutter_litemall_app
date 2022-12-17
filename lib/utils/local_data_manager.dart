@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocalDataManager {
   const LocalDataManager._();
 
+  // storing imgPath
   static const _imgPathKey = 'imgPath';
 
   static LocalDataManager getInstance() {
@@ -31,53 +32,4 @@ class LocalDataManager {
       return result;
     }
   }
-
-// save selected beers
-// Future<bool> saveSelectedBeers(Set<String> selectedBeers) async {
-//   final prefs = await SharedPreferences.getInstance();
-//
-//   return await prefs.setStringList(_beersKey, selectedBeers.toList());
-// }
-
-// get selected beers
-// Future<List<String>?> getSelectedBeers() async {
-//   final prefs = await SharedPreferences.getInstance();
-//
-//   return prefs.getStringList(_beersKey);
-// }
-
-// remove selected beers
-// Future<bool> removeSelectedBeers() async {
-//   final prefs = await SharedPreferences.getInstance();
-//
-//   return await prefs.remove(_beersKey);
-// }
-
-// save latest beer index
-// Future<bool> saveLatestBeerIndex(int index) async {
-//   final prefs = await SharedPreferences.getInstance();
-//
-//   return await prefs.setInt(_latestBeerKey, index);
-// }
-
-// get latest beer index
-// Future<int?> getLatestBeerIndex() async {
-//   final prefs = await SharedPreferences.getInstance();
-//
-//   return prefs.getInt(_latestBeerKey);
-// }
-
-// remove latest beer index
-// Future<bool> removeLatestBeerIndex() async {
-//   final prefs = await SharedPreferences.getInstance();
-//
-//   return await prefs.remove(_latestBeerKey);
-// }
-
-// delete all the data
-// Future<bool> clearAllData() async {
-//   final prefs = await SharedPreferences.getInstance();
-//
-//   return prefs.clear();
-// }
 }

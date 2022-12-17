@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:litemall_app/models/image_response.dart';
 
+import '../../models/image_response.dart';
 import '../../data/response/api_response.dart';
 import '../../models/category_model.dart';
 import '../../models/product_model.dart';
-
 import '../../utils/util.dart';
 import '../../repo/product_repo/product_repo.dart';
 
@@ -93,15 +92,23 @@ class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
   Future<void> getProducts() async {
     'ProductViewModel getProducts call'.log();
     try {
-      Global.url = '${Global.host}${Global.baseUrl}/e-commerce-products';
       int pageCount = 1;
-      Global.param = '?pagination%5Bpage%5D=$pageCount&populate=%2A';
-      final products = await _productRepo.getProducts(url: Global.url + Global.param);
+      List<ProductSubData> tmpLists = [];
+      for (int i = 0; true; i++) {
+        Global.url = '${Global.host}${Global.baseUrl}/e-commerce-products';
+        Global.param = '?pagination%5Bpage%5D=$pageCount&populate=%2A';
+        final products = await _productRepo.getProducts(url: Global.url + Global.param);
 
-      _products = ApiResponse.complete(products);
+        pageCount++;
+        if (products.isEmpty) {
+          break;
+        }
 
+        tmpLists = [...tmpLists, ...products];
+      }
+
+      _products = ApiResponse.complete(tmpLists);
       _loopProduct();
-
       notifyListeners();
     } catch (e, stackTrace) {
       'ProductViewModel getProducts error :: ${e.toString()}'.log();
@@ -176,16 +183,19 @@ class ProductViewModel with ChangeNotifier implements BaseProductViewModel {
     }
   }
 
+  // adding products to wishlists
   void addToWishList(ProductSubData product) {
     _wishLists = [..._wishLists, product];
     notifyListeners();
   }
 
+  // remove product from wishlist
   void removeFromWishList(ProductSubData product) {
     _wishLists.remove(product);
     notifyListeners();
   }
 
+  // remove all products from wishlist
   void removeAllFromWishList() {
     _wishLists.clear();
     notifyListeners();

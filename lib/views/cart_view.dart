@@ -78,11 +78,12 @@ class CartView extends StatelessWidget {
         itemCount: productViewModel.cartLists.length,
         itemBuilder: (BuildContext context, int index) {
           final data = productViewModel.cartLists[index];
-          return SlidableWidget(
-            onDeletePressed: (context) => productViewModel.removeFromCart(data),
-            child: Card(
-              margin: const EdgeInsets.only(bottom: 16),
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: SlidableWidget(
+              onDeletePressed: (context) => productViewModel.removeFromCart(data),
               child: ListTile(
+                contentPadding: const EdgeInsets.all(8.0),
                 leading: data.attributes.thumbnail.data == null
                     ? CircleAvatar(
                         child: Text(
