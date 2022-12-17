@@ -34,10 +34,14 @@ class CategoryDetailView extends StatelessWidget {
         ),
         centerTitle: true,
         actions: [
-          CustomIconButton(
-            onPressed: () {},
-            icon: CustomIcon.cart,
-            showBadge: productViewModel.cartLists.isNotEmpty ? true : false,
+          StatefulBuilder(
+            builder: (BuildContext context, void Function(void Function()) setState) {
+              return CustomIconButton(
+                onPressed: () => Navigator.of(context).pushNamed(Global.CART).then((value) => setState(() {})),
+                icon: CustomIcon.cart,
+                showBadge: productViewModel.cartLists.isNotEmpty ? true : false,
+              );
+            },
           ),
           const SizedBox(
             width: 10.0,
